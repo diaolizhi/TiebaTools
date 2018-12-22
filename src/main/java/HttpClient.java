@@ -368,7 +368,7 @@ public class HttpClient {
     * @Author: diaolizhi
     * @Date: 2018/12/20
     */
-    public void getUserPost(String BDUSS, String userName, String pn) throws IOException {
+    public ReplyRecord[] getUserPost(String BDUSS, String userName, String pn) throws IOException {
         Headers.Builder builder = getBuilder();
         builder.add("Connection", "Keep-Alive");
         builder.add("Accept", "application/protobuf");
@@ -378,6 +378,7 @@ public class HttpClient {
 
         map.put("BDUSS", BDUSS);
         map.put("need_content", "1");
+//        is_thread 表明获取的是不是主题帖
 //        map.put("is_thread", "1");
         map.put("net_type", "2");
         map.put("thread_type", "0");
@@ -407,10 +408,7 @@ public class HttpClient {
 
 //        System.out.println(res);
 
-        ReplyRecord[] records = JsonUtils.recordsParser(res);
-
-        System.out.println(new Gson().toJson(records));
-
+        return JsonUtils.recordsParser(res);
     }
 
     public void test2(String BDUSS, String userName) throws IOException {
@@ -514,13 +512,13 @@ public class HttpClient {
     }
 
     /** 
-    * @Description: 获取通过【帖子id】查看一个帖子内容 
+    * @Description: 获取通过【帖子id】查看一个帖子内容，如果存在【楼层id】将返回之后的数据
     * @Param: [BDUSS, kz] 
     * @return: void 
     * @Author: diaolizhi
     * @Date: 2018/12/20 
     */ 
-    public void seeAThread(String BDUSS, String kz) {
+    public void seeAThread(String BDUSS, String kz, String pid) {
         String url = "http://c.tieba.baidu.com/c/f/pb/page";
 
         Headers.Builder builder = getBuilder();
@@ -530,7 +528,10 @@ public class HttpClient {
         map.put("BDUSS", BDUSS);
         map.put("kz", kz);
 //        map.put("pn", "1");
-        map.put("cid", "123315568179");
+
+//        可以不要 pid 字段，如果有这个字段的话，将返回那一层之后的楼层
+        map.put("pid", pid);
+        map.put("cid", pid);
 
         Request request = new Request.Builder()
                 .url(url)
@@ -546,26 +547,31 @@ public class HttpClient {
     }
 
     /** 
-    * @Description: 通过【帖子id】和【回复id】获取某一楼的内容，返回结果未处理
+    * @Description: 通过【帖子id】和【回复id / 楼层id】获取某一楼的内容，返回结果未处理
     * @Param: [BDUSS, kz, pid] 
     * @return: void 
     * @Author: diaolizhi
     * @Date: 2018/12/20 
     */ 
     public void seeAFloor(String BDUSS, String kz, String pid) {
-        String url = "http://c.tieba.baidu.com/c/f/pb/floor";
 
-        Headers.Builder builder = getBuilder();
-//        builder.add("", "");
+//        这个接口有两个作用，可以通过【某一楼的 post_id】获取该层信息
+//        还可以根据【楼中楼的 post_id】获取该楼层信息
+        String url = "http://c.tieba.baidu.com/c/f/pb/floor";
 
         TreeMap<String, String> map = new TreeMap<>();
 //        map.put("BDUSS", BDUSS);
         map.put("kz", kz);
+//        这里的 pid -> 某一层楼的 pid，如果存在 pid 这个字段，将从那一层楼开始显示
+//        map.put("pid", pid);
+
+//        如果使用 spid 那么传入的就需要是【楼中楼的 post_id】
         map.put("spid", pid);
-        map.put("_client_type", "1");
+        map.put("_client_type", "2");
         map.put("pn", "1");
-//        map.put("sn", "1");
-//        map.put("cid", "123315568179");
+        map.put("rn", "20");
+        map.put("_client_version", "9.6.0");
+        map.put("net_type", "1");
 
         Request request = new Request.Builder()
                 .url(url)
