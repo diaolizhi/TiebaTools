@@ -1,12 +1,9 @@
 import com.google.gson.*;
 import domain.ReplyRecord;
-import domain.TinyReplyRecord;
-import netscape.javascript.JSObject;
 import okhttp3.*;
-import okhttp3.internal.http2.Header;
-import okio.BufferedSink;
+import utils.JsonUtils;
+import utils.OtherUtils;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.TreeMap;
@@ -166,7 +163,7 @@ public class HttpClient {
     * @Date: 2018/11/12
     */
     private RequestBody getRequestBody(TreeMap<String, String> map) {
-        String body = Tools.countSign(map);
+        String body = OtherUtils.countSign(map);
         return RequestBody.create(mediaType, body);
     }
 
@@ -353,7 +350,7 @@ public class HttpClient {
 
 
 
-        String res = Tools.postData(url, hBuilder, body);
+        String res = OtherUtils.postData(url, hBuilder, body);
         System.out.println(res);
 
 //        解析 Json 数据
@@ -365,59 +362,33 @@ public class HttpClient {
     }
 
     /**
-    * @Description: 获取某人的回帖记录【未命名】
+    * @Description: 获取某人的回帖记录
     * @Param: [BDUSS, userName, pn]
     * @return: void
     * @Author: diaolizhi
     * @Date: 2018/12/20
     */
-    public void test(String BDUSS, String userName, String pn) throws IOException {
+    public void getUserPost(String BDUSS, String userName, String pn) throws IOException {
         Headers.Builder builder = getBuilder();
         builder.add("Connection", "Keep-Alive");
         builder.add("Accept", "application/protobuf");
         builder.add("Content-Type", "application/x-www-form-urlencoded");
 
         TreeMap map = new TreeMap();
-//        map.put("BDUSS", BDUSS);
-//        map.put("_client_type", "2");
-//        map.put("_client_version", "9.2.0.4");
-//        map.put("uid", getFriendUid(userName));
-////        map.put("hide_post", "0");
-////        map.put("friend_uid", "79");
-////        map.put("is_guest", "1");
-//        map.put("is_thread", "1");
-//        map.put("pn", pn);
-////        map.put("type", "0");
-////        map.put("post_content", "1");
-//        map.put("need_content", "1");
 
-
+        map.put("BDUSS", BDUSS);
         map.put("need_content", "1");
 //        map.put("is_thread", "1");
         map.put("net_type", "2");
         map.put("thread_type", "0");
         map.put("_client_id", "wappc_1545325162964_493.0");
-//        map.put("timestamp", "1545325162964");
+        map.put("timestamp", String.valueOf(System.currentTimeMillis()));
         map.put("_client_type", "2");
-//        map.put("from", "tieba");
-//        map.put("rn", "20");
-        map.put("pn", "2");
-        map.put("is_guest", "0");
-        map.put("is_friend", "1");
-//        map.put("is_bawu", "1");
-//        map.put("is_mask", "0");
-//        map.put("is_hide", "0");
-//        map.put("type", "0");
-//        map.put("friend_id", getFriendUid("凶杀组"));
-//        map.put("uid", getFriendUid("神相"));
-        map.put("uid", getFriendUid("稍加"));
-//        map.put("_phone_imei", "352316052799040");
+        map.put("pn", pn);
+        map.put("uid", getFriendUid(userName));
         map.put("_client_version", "9.2.2");
 
-//        todo: 如果 Cookie 和 Body 同时存在 BDUSS?
-
         Request request = new Request.Builder()
-//                .url("http://c.tieba.baidu.com/c/u/feed/mypost")
                 .url("http://c.tieba.baidu.com/c/u/feed/userpost")
                 .headers(builder.build())
                 .post(getRequestBody(map))
@@ -427,100 +398,19 @@ public class HttpClient {
         try {
             response = client.newCall(request).execute();
 
-
-//            FileOutputStream stream = new FileOutputStream("C:\\Users\\dlz\\Desktop\\fuck.txt");
-//            try {
-//                stream.write(response.body().bytes());
-//                System.out.println("保存成功");
-//            } finally {
-//                stream.close();
-//            }
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+//        userpost 接口返回的数据
         String res = response.body().string();
 
-        System.out.println(res);
+//        System.out.println(res);
 
-        JsonElement element = new JsonParser().parse(res);
-        JsonObject object = element.getAsJsonObject();
-        JsonArray array = object.getAsJsonArray("post_list");
-
-        ReplyRecord[] records = new ReplyRecord[array.size()];
-
-        for (int i=0; i<array.size(); i++) {
-            object = array.get(i).getAsJsonObject();
-            String forum_id = object.get("forum_id").getAsString();
-            String thread_id = object.get("thread_id").getAsString();
-            String post_id = object.get("post_id").getAsString();
-            String forumName = object.get("forum_name").getAsString();
-            String title = object.get("title").getAsString();
-
-            JsonArray contents = object.get("content").getAsJsonArray();
-
-            String replyContent = "";
-            String replyPostId = "";
-
-            TinyReplyRecord[] tinyReplyRecords = new TinyReplyRecord[contents.size()];
-
-//            contents 是同一个帖子的不同回复
-            for (int j=0; j<contents.size(); j++) {
-                System.out.println(contents.get(j));
-                JsonArray postList = contents.get(j).getAsJsonObject().get("post_content").getAsJsonArray();
-
-//                一个 postList 其实是一条回复，但是由不同部分组成
-                for (int k=0; k<postList.size(); k++) {
-                    JsonObject postObject = postList.get(k).getAsJsonObject();
-                    if (postObject.get("type").getAsInt() == 10) {
-                        System.out.println("这是一条语音，暂不支持。");
-                        continue;
-                    }
-                    replyContent += postObject.get("text").getAsString();
-                }
-
-                replyPostId = contents.get(j).getAsJsonObject().get("post_id").getAsString();
-
-                tinyReplyRecords[j] = new TinyReplyRecord(replyPostId, replyContent);
-
-                replyContent = "";
-                replyPostId = "";
-
-                System.out.println(replyContent);
-            }
-
-
-            String quotePostId = "";
-            String quoteUserName = "";
-            String quoteContent = "";
-
-            try {
-                JsonObject quote = object.get("quote").getAsJsonObject();
-                quotePostId = quote.get("post_id").getAsString();
-                quoteUserName = quote.get("user_name").getAsString();
-                quoteContent = quote.get("content").getAsString();
-//                System.out.println(quotePostId + quoteUserName + quoteContent);
-            } catch (Exception e) {
-
-            }
-
-
-            records[i] = new ReplyRecord(forum_id, thread_id, post_id, quotePostId,
-                    quoteUserName, quoteContent, forumName, title, tinyReplyRecords);
-
-
-
-//            System.out.println("论坛id:" + forum_id + "  帖子id:" + thread_id + "  回复id:" + post_id);
-        }
-
-//        for (int i=0; i<records.length; i++) {
-//            System.out.println(records[i]);
-//        }
+        ReplyRecord[] records = JsonUtils.recordsParser(res);
 
         System.out.println(new Gson().toJson(records));
 
-//        System.out.println(array);
-
-//        System.out.println(res);
     }
 
     public void test2(String BDUSS, String userName) throws IOException {

@@ -1,6 +1,10 @@
+package utils;
+
 import okhttp3.*;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -11,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * @author: diaolizhi
  * @create: 2018-11-12 15:24
  **/
-public class Tools {
+public class OtherUtils {
 
     /**
     * @Description: 以下三个方法用于 MD5 加密
@@ -36,7 +40,7 @@ public class Tools {
     }
 
     private static String md5(String txt) {
-        return Tools.getHash(txt, "MD5").toUpperCase();
+        return OtherUtils.getHash(txt, "MD5").toUpperCase();
     }
 
     /**
@@ -62,7 +66,7 @@ public class Tools {
                     .append("&");
         }
         tString.append("tiebaclient!!!");
-        String sign = Tools.md5(tString.toString());
+        String sign = OtherUtils.md5(tString.toString());
         bodyString.append("sign")
                 .append("=")
                 .append(sign);
@@ -89,5 +93,18 @@ public class Tools {
                 System.out.println(body + "发送请求失败");
             }
         }
+    }
+
+    /** 
+    * @Description: 将时间戳格式化
+    * @Param: [time] 
+    * @return: java.lang.String 
+    * @Author: diaolizhi
+    * @Date: 2018/12/22 
+    */ 
+    public static String formatTime(String time) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
+        Date date = new Date(Long.parseLong(time + "000"));
+        return format.format(date);
     }
 }

@@ -11,27 +11,37 @@ import com.google.gson.Gson;
 public class TinyReplyRecord {
 
     private String replyPostId;
-    private String ReplyContent;
+    private String replyContent;
+    private String replyTime;
 
-    public TinyReplyRecord(String replyPostId, String replyContent) {
+    public TinyReplyRecord(String replyPostId, String replyContent, String replyTime) {
         this.replyPostId = replyPostId;
-        ReplyContent = replyContent;
-    }
-
-    public String getreplyPostId() {
-        return replyPostId;
-    }
-
-    public void setreplyPostId(String replyPostId) {
-        this.replyPostId = replyPostId;
+        this.replyContent = replyContent;
+        this.replyTime = replyTime;
     }
 
     public String getReplyContent() {
-        return ReplyContent;
+        return replyContent;
     }
 
     public void setReplyContent(String replyContent) {
-        ReplyContent = replyContent;
+        replyContent = replyContent;
+    }
+
+    public String getReplyPostId() {
+        return replyPostId;
+    }
+
+    public void setReplyPostId(String replyPostId) {
+        this.replyPostId = replyPostId;
+    }
+
+    public String getReplyTime() {
+        return replyTime;
+    }
+
+    public void setReplyTime(String replyTime) {
+        this.replyTime = replyTime;
     }
 
     @Override
@@ -41,7 +51,7 @@ public class TinyReplyRecord {
 
 //        return "TinyReplyRecord{" +
 //                "replyPostId='" + replyPostId + '\'' +
-//                ", ReplyContent='" + ReplyContent + '\'' +
+//                ", replyContent='" + replyContent + '\'' +
 //                '}';
     }
 }
