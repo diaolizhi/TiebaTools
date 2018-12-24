@@ -18,11 +18,21 @@ import java.util.TreeMap;
  **/
 public class HttpClient {
 
-    private final OkHttpClient client = new OkHttpClient()
-            .newBuilder()
-            .addInterceptor(new UnzippingInterceptor())
-            .build();
-    private final MediaType mediaType =  MediaType.parse("application/text; charset=UTF-8");
+    private final OkHttpClient client;
+    private final MediaType mediaType;
+
+    public HttpClient() {
+
+        client = new OkHttpClient()
+                .newBuilder()
+                .addInterceptor(new UnzippingInterceptor())
+                .build();
+
+        client.dispatcher().setMaxRequests(100);
+        client.dispatcher().setMaxRequestsPerHost(100);
+
+        mediaType = MediaType.parse("application/text; charset=UTF-8");
+    }
 
     /**
     * @Description: 获取用户的用户名和 uid
@@ -92,7 +102,6 @@ public class HttpClient {
 
         TreeMap<String, String> map = new TreeMap<>();
         map.put("BDUSS", BDUSS);
-        map.put("page_no", "1");
         map.put("_client_type", "2");
         map.put("page_size", "200");
         map.put("_client_version", "9.8.8.7");
@@ -109,14 +118,10 @@ public class HttpClient {
 
                 UserForumsInfo forumsInfo = JsonUtils.userForumListParser(res);
 
-                hasMore = forumsInfo.getHasMore() == 1;
+                hasMore = (forumsInfo.getHasMore() == 1);
 
-                for (int i=0; i<forumsInfo.getOneForumInfos().size(); i++) {
-                    String[] strings = new String[2];
-                    OneForumInfo oneForumInfo = forumsInfo.getOneForumInfos().get(i);
-                    strings[0] = oneForumInfo.getName();
-                    strings[1] = oneForumInfo.getId();
-                    resList.add(strings);
+                if (forumsInfo.getOneForumInfos() != null) {
+                    addForumToList(resList, forumsInfo);
                 }
 
             } catch (Exception e) {
@@ -125,6 +130,16 @@ public class HttpClient {
         }
 
         return resList;
+    }
+
+    private void addForumToList(ArrayList<String[]> resList, UserForumsInfo forumsInfo) {
+        for (int i=0; i<forumsInfo.getOneForumInfos().size(); i++) {
+            String[] strings = new String[2];
+            OneForumInfo oneForumInfo = forumsInfo.getOneForumInfos().get(i);
+            strings[0] = oneForumInfo.getName();
+            strings[1] = oneForumInfo.getId();
+            resList.add(strings);
+        }
     }
 
     /**
@@ -153,9 +168,6 @@ public class HttpClient {
         String url = "http://c.tieba.baidu.com/c/c/forum/sign";
         Headers.Builder builder = getBuilder();
 
-        client.dispatcher().setMaxRequests(100);
-        client.dispatcher().setMaxRequestsPerHost(100);
-
         TreeMap<String, String> map = new TreeMap<>();
         map.put("BDUSS", BDUSS);
 
@@ -180,7 +192,9 @@ public class HttpClient {
                     String[] err = new String[2];
                     err[0] = forumList.get(j)[0];
                     err[1] = forumList.get(j)[1];
-                    errorList.add(err);
+                    synchronized (this) {
+                        errorList.add(err);
+                    }
                     System.err.println(forumList.get(j)[0] + "网络请求失败");
                 }
                 @Override
@@ -195,12 +209,14 @@ public class HttpClient {
                     String errorCode = root.get("error_code").getAsString();
 
                     if (!errorCode.equals("160002") && !errorCode.equals("340008")
-                            && !errorCode.equals("340006")) {
+                            && !errorCode.equals("340006") && !errorCode.equals("0")) {
 
                         String[] err = new String[2];
                         err[0] = forumList.get(j)[0];
                         err[1] = forumList.get(j)[1];
-                        errorList.add(err);
+                        synchronized (this) {
+                            errorList.add(err);
+                        }
                     }
 
                 }
@@ -596,4 +612,62 @@ public class HttpClient {
         exePostRequest(url, builder, map);
     }
 
+    public void cloneForums(String BDUSS, String username) {
+        boolean hasMore = true;
+        int pageNo = 1;
+
+        ArrayList<String[]> forumList = new ArrayList<>();
+
+        UserForumsInfo forumsInfo;
+
+        while (hasMore && forumList.size() <= 3001) {
+            forumsInfo = getOtherForumList(username, String.valueOf(pageNo++));
+            hasMore = forumsInfo.getHasMore() == 1;
+            if (forumsInfo.getOneForumInfos() != null) {
+                addForumToList(forumList, forumsInfo);
+            }
+        }
+
+        likeForums(BDUSS, forumList);
+
+    }
+
+    public void likeForums(String BDUSS, ArrayList<String[]> forumList) {
+
+        String url = "http://c.tieba.baidu.com/c/c/forum/like";
+
+        Headers.Builder builder = getBuilder();
+
+        for (int i=0; i<forumList.size(); i++) {
+            TreeMap<String, String> map = new TreeMap<>();
+            map.put("BDUSS", BDUSS);
+            map.put("_client_type", "2");
+            map.put("_client_version", "7.2.0.0");
+            map.put("fid", forumList.get(i)[1]);
+            map.put("from", "mini_baidu_appstore");
+            map.put("kw", forumList.get(i)[0]);
+            map.put("st_type", "from_frs");
+            map.put("subapp_type", "mini");
+            map.put("tbs", getTbs(BDUSS));
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .headers(builder.build())
+                    .post(getRequestBody(map))
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    response.close();
+                }
+            });
+        }
+
+    }
 }

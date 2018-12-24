@@ -137,7 +137,6 @@ public class JsonUtils {
     * @Date: 2018/12/24
     */
     public static UserForumsInfo userForumListParser(String res) {
-
         JsonObject root = getJsonObject(res);
 
         int hasMore = root.get("has_more").getAsInt();
@@ -157,11 +156,18 @@ public class JsonUtils {
         } catch (NullPointerException e) {
         }
 
-//        获取【普通贴吧】
-        JsonArray nonList = forumList.get("non-gconforum").getAsJsonArray();
-        forumListParser(nonList, forumInfos);
+        try {
 
-        userForumsInfo.setOneForumInfos(forumInfos);
+//        获取【普通贴吧】，普通贴吧也可能不存在。
+            JsonArray nonList = forumList.get("non-gconforum").getAsJsonArray();
+            forumListParser(nonList, forumInfos);
+
+            userForumsInfo.setOneForumInfos(forumInfos);
+        } catch (Exception e) {
+            //不做处理
+        }
+
+
 
         return userForumsInfo;
 

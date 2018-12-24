@@ -72,6 +72,10 @@ public class TBUser {
         
     }
 
+    public void cloneForums(String userName) {
+        client.cloneForums(this.BDUSS, userName);
+    }
+
     public void setBDUSS(String BDUSS) {
         this.BDUSS = BDUSS;
     }
