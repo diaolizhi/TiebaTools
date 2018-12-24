@@ -1,18 +1,14 @@
 package utils;
 
-import okhttp3.*;
-
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @program: tiebatool
  * @description: 工具类
- * @author: diaolizhi
+ * @author:
  * @create: 2018-11-12 15:24
  **/
 public class OtherUtils {
@@ -73,28 +69,6 @@ public class OtherUtils {
         return bodyString.toString();
     }
 
-    //  用于 POST 数据
-    public static String postData(String url, Headers.Builder hBuilder, TreeMap<String, String> body) {
-        MediaType aTEXT =  MediaType.parse("application/text; charset=utf-8");
-        OkHttpClient aclient = new OkHttpClient.Builder().connectTimeout(20, TimeUnit.SECONDS).build();
-        System.out.println(countSign(body) );
-        RequestBody myBody = RequestBody.create(aTEXT, countSign(body));
-        Request request = new Request.Builder()
-                .url(url)
-                .headers(hBuilder.build())
-                .post(myBody)
-                .build();
-
-        while(true) {
-            try {
-                return aclient.newCall(request).execute().body().string();
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println(body + "发送请求失败");
-            }
-        }
-    }
-
     /** 
     * @Description: 将时间戳格式化
     * @Param: [time] 
@@ -107,4 +81,5 @@ public class OtherUtils {
         Date date = new Date(Long.parseLong(time + "000"));
         return format.format(date);
     }
+
 }

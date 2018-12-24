@@ -1,11 +1,9 @@
 package utils;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import domain.ReplyRecord;
-import domain.TinyReplyRecord;
+import com.google.gson.*;
+import domain.*;
+
+import java.util.ArrayList;
 
 /**
  * @program: tiebatool
@@ -40,8 +38,8 @@ public class JsonUtils {
             JsonArray contents = object.get("content").getAsJsonArray();
 
             String replyContent = "";
-            String replyPostId = "";
-            String replyTime = "";
+            String replyPostId;
+            String replyTime;
 
             TinyReplyRecord[] tinyReplyRecords = new TinyReplyRecord[contents.size()];
 
@@ -87,18 +85,136 @@ public class JsonUtils {
 
             }
 
-
             records[i] = new ReplyRecord(forum_id, thread_id, post_id, quotePostId,
                     quoteUserName, quoteContent, forumName, title, tinyReplyRecords);
-
         }
 
         return records;
     }
 
+    /**
+    * @Description: 解析【帖子】列表
+    * @Param: [res]
+    * @return: domain.ThreadRecord[]
+    * @Author: diaolizhi
+    * @Date: 2018/12/24
+    */
+    public static ThreadRecord[] threadListParser(String res) {
 
-//    todo:该楼作者 该楼内容 该楼id 帖子标题 帖子id 楼中楼内容
+        JsonObject root = getJsonObject(res);
+        JsonArray threadList = root.get("thread_list").getAsJsonArray();
 
-//    public static
+        ThreadRecord[] threadRecords = new ThreadRecord[threadList.size()];
+
+        for (int i=0; i<threadList.size(); i++) {
+            JsonObject threadObject = threadList.get(i).getAsJsonObject();
+            String tid = threadObject.get("tid").getAsString();
+            String title = threadObject.get("title").getAsString();
+            int replyNum = threadObject.get("reply_num").getAsInt();
+
+            JsonObject authorInfo = threadObject.get("author").getAsJsonObject();
+            String author = authorInfo.get("name").getAsString();
+
+            JsonArray contents = threadObject.get("abstract").getAsJsonArray();
+
+            String content = "";
+
+            for (int j=0; j<contents.size(); j++) {
+                content += contents.get(j).getAsJsonObject().get("text");
+            }
+
+            threadRecords[i] = new ThreadRecord(tid, title, replyNum, author, content);
+        }
+
+        return threadRecords;
+    }
+
+    /**
+    * @Description: 解析 /c/f/forum/like 接口返回的数据
+    * @Param: [res]
+    * @return: domain.UserForumsInfo
+    * @Author: diaolizhi
+    * @Date: 2018/12/24
+    */
+    public static UserForumsInfo userForumListParser(String res) {
+
+        JsonObject root = getJsonObject(res);
+
+        int hasMore = root.get("has_more").getAsInt();
+
+//        userForumsInfo 包含的信息：1、是否还有下一页。 2、贴吧列表(使用 ArrayList<OneForumInfo> 保存)
+        UserForumsInfo userForumsInfo = new UserForumsInfo();
+        userForumsInfo.setHasMore(hasMore);
+
+        JsonObject forumList = root.get("forum_list").getAsJsonObject();
+
+        ArrayList<OneForumInfo> forumInfos = new ArrayList<>();
+
+//        获取【官方贴吧】，可能不存在。
+        try {
+            JsonArray gconList = forumList.get("gconforum").getAsJsonArray();
+            forumListParser(gconList, forumInfos);
+        } catch (NullPointerException e) {
+        }
+
+//        获取【普通贴吧】
+        JsonArray nonList = forumList.get("non-gconforum").getAsJsonArray();
+        forumListParser(nonList, forumInfos);
+
+        userForumsInfo.setOneForumInfos(forumInfos);
+
+        return userForumsInfo;
+
+    }
+
+    private static void forumListParser(JsonArray nonList, ArrayList<OneForumInfo> forumInfos) {
+        for (int i=0; i<nonList.size(); i++) {
+            String id = nonList.get(i).getAsJsonObject().get("id").getAsString();
+            String name = nonList.get(i).getAsJsonObject().get("name").getAsString();
+            String levelId = nonList.get(i).getAsJsonObject().get("level_id").getAsString();
+            String curScore = nonList.get(i).getAsJsonObject().get("cur_score").getAsString();
+            String levelupScore = nonList.get(i).getAsJsonObject().get("levelup_score").getAsString();
+
+            forumInfos.add(new OneForumInfo(id, name, levelId, curScore, levelupScore));
+        }
+    }
+
+    public static String[] userInfoParser(String res) {
+        String[] info = new String[2];
+        JsonObject userInfo = getJsonObject(res).getAsJsonObject();
+
+        userInfo = userInfo.getAsJsonObject("user");
+
+        String id = userInfo.get("id").getAsString();
+        info[0] = id;
+
+        String name = userInfo.get("name").getAsString();
+        info[1] = name;
+
+        return info;
+    }
+
+    public static String fidParser(String res) {
+        JsonObject root = getJsonObject(res);
+        JsonObject data = root.getAsJsonObject("data");
+        JsonElement fid = data.get("fid");
+        String fidStr = fid.getAsString();
+        return fidStr;
+    }
+
+    public static String tbsParser(String res) {
+        JsonObject root = getJsonObject(res);
+        return root.get("tbs").getAsString();
+    }
+
+    private static JsonObject getJsonObject(String res) {
+        return new JsonParser().parse(res).getAsJsonObject();
+    }
+
+    public static String fuidParser(String res) {
+        JsonObject root = getJsonObject(res);
+        JsonArray userInfo = root.get("user_info").getAsJsonArray();
+        return userInfo.get(0).getAsJsonObject().get("user_id").getAsString();
+    }
 
 }

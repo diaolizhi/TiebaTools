@@ -46,12 +46,6 @@ public class TinyReplyRecord {
 
     @Override
     public String toString() {
-
         return new Gson().toJson(this);
-
-//        return "TinyReplyRecord{" +
-//                "replyPostId='" + replyPostId + '\'' +
-//                ", replyContent='" + replyContent + '\'' +
-//                '}';
     }
 }

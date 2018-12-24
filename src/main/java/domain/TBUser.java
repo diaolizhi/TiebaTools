@@ -1,4 +1,9 @@
+package domain;
+
+import sendHttp.HttpClient;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * @program: tiebatool
@@ -8,7 +13,7 @@ import java.util.ArrayList;
  **/
 public class TBUser {
 
-    private ArrayList<String> forumList;
+    private ArrayList<String[]> forumList;
     private int forumListNum;
     private ArrayList<String> replyAdds;
     private String BDUSS;
@@ -17,9 +22,9 @@ public class TBUser {
 
     private final HttpClient client = new HttpClient();
 
-    TBUser(String BDUSS) {
+    public TBUser(String BDUSS) {
         this.BDUSS = BDUSS;
-        login();
+        getUserInfo();
     }
 
     /**
@@ -30,7 +35,7 @@ public class TBUser {
     * @Date: 2018/11/12
     */
     public void updateForumList() {
-        forumList = client.updateForumList(BDUSS);
+        forumList = client.getForumList(BDUSS);
         forumListNum = forumList.size();
     }
 
@@ -41,8 +46,8 @@ public class TBUser {
     * @Author: diaolizhi
     * @Date: 2018/11/12
     */
-    private void login() {
-        client.login(this);
+    private void getUserInfo() {
+        client.getUserInfo(this);
     }
 
     /**
@@ -53,7 +58,7 @@ public class TBUser {
     * @Date: 2018/11/12
     */
     public void Sign() {
-        client.Sign(this.BDUSS, this.forumList);
+        client.Sign(this.BDUSS, this.forumList, 0);
     }
 
     /** 
@@ -83,7 +88,7 @@ public class TBUser {
         this.uid = uid;
     }
 
-    public ArrayList<String> getForumList() {
+    public ArrayList<String[]> getForumList() {
         return forumList;
     }
 
@@ -107,9 +112,7 @@ public class TBUser {
         this.forumListNum = forumListNum;
     }
 
-    public static void main(String[] args) {
-        String BDUSS = "kotbGZVLVV4c1Y2SnIyTXdaTDRYS3VwWjNYbEtIR1ZXc1FHa3lPdzlFY3JzeEJjQUFBQUFBJCQAAAAAAAAAAAEAAACBd1410ruw77~TzeZMT0wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACsm6VsrJulbS";
-        TBUser tbUser = new TBUser(BDUSS);
-        tbUser.Sign();
+    public boolean isLogin() {
+        return this.uid == null;
     }
 }

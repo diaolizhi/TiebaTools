@@ -2,11 +2,9 @@ package domain;
 
 import com.google.gson.Gson;
 
-import java.util.Arrays;
-
 /**
  * @program: tiebatool
- * @description: 用户回帖记录：吧id，帖子id，回复id
+ * @description: 在【一个帖子中的回复】
  * @author: diaolizhi
  * @create: 2018-12-20 21:13
  **/
@@ -15,6 +13,7 @@ public class ReplyRecord {
     private String forumId;
     private String threadId;
     private String postId;
+    /** 如果是楼中楼下面三个属性才会有值 **/
     private String quotePostId;
     private String quoteUsername;
     private String quoteContent;
@@ -103,18 +102,6 @@ public class ReplyRecord {
     public String toString() {
 
         return new Gson().toJson(this);
-
-//        return "ReplyRecord{" +
-//                "forumId='" + forumId + '\'' +
-//                ", threadId='" + threadId + '\'' +
-//                ", postId='" + postId + '\'' +
-//                ", quotePostId='" + quotePostId + '\'' +
-//                ", quoteUsername='" + quoteUsername + '\'' +
-//                ", quoteContent='" + quoteContent + '\'' +
-//                ", forumName='" + forumName + '\'' +
-//                ", title='" + title + '\'' +
-//                ", tinyReplyRecords=" + Arrays.toString(tinyReplyRecords) +
-//                '}';
     }
 
     public TinyReplyRecord[] getTinyReplyRecords() {
