@@ -68,8 +68,8 @@ public class TBUser {
     * @Author: diaolizhi
     * @Date: 2018/11/12 
     */ 
-    public void reply() {
-        
+    public void reply(String content, String forumName, String tid) {
+        client.postAdd(this.BDUSS,content, forumName, tid);
     }
 
     public void cloneForums(String userName) {
