@@ -439,7 +439,8 @@ public class HttpClient {
 
         String url = "http://c.tieba.baidu.com/c/c/post/add";
 
-        exePostRequest(url, builder, map);
+        Response response = exePostRequest(url, builder, map);
+        response.close();
     }
 
 

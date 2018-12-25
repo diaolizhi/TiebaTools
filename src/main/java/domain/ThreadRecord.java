@@ -17,13 +17,15 @@ public class ThreadRecord {
     private int replyNum;
     private String author;
     private String content;
+    private int sex;
 
-    public ThreadRecord(String tid, String title, int replyNum, String author, String content) {
+    public ThreadRecord(String tid, String title, int replyNum, String author, String content, int sex) {
         this.tid = tid;
         this.title = title;
         this.replyNum = replyNum;
         this.author = author;
         this.content = content;
+        this.sex = sex;
     }
 
     public String getTid() {
@@ -64,6 +66,14 @@ public class ThreadRecord {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public int getSex() {
+        return sex;
+    }
+
+    public void setSex(int sex) {
+        this.sex = sex;
     }
 
     @Override

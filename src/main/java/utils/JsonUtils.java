@@ -114,6 +114,7 @@ public class JsonUtils {
 
             JsonObject authorInfo = threadObject.get("author").getAsJsonObject();
             String author = authorInfo.get("name").getAsString();
+            int sex = authorInfo.get("sex").getAsInt();
 
             JsonArray contents = threadObject.get("abstract").getAsJsonArray();
 
@@ -123,7 +124,7 @@ public class JsonUtils {
                 content += contents.get(j).getAsJsonObject().get("text");
             }
 
-            threadRecords[i] = new ThreadRecord(tid, title, replyNum, author, content);
+            threadRecords[i] = new ThreadRecord(tid, title, replyNum, author, content, sex);
         }
 
         return threadRecords;
