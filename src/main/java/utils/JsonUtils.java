@@ -223,4 +223,44 @@ public class JsonUtils {
         return userInfo.get(0).getAsJsonObject().get("user_id").getAsString();
     }
 
+    /**
+    * @Description: /c/f/pb/floor 接口，保存某一层楼下某一个人的回复，只保存文本
+    * @Param: [res, username]
+    * @return: java.util.ArrayList<java.lang.String>
+    * @Author: diaolizhi
+    * @Date: 2018/12/25
+    */
+    public static ArrayList<String> subPostsParser(String res, String username) {
+        JsonObject root = getJsonObject(res);
+        JsonArray subpostList = root.get("subpost_list").getAsJsonArray();
+
+        if (subpostList.size() == 0) {
+            return null;
+        }
+
+        ArrayList<String> posts = new ArrayList<>();
+        for (int i=0; i<subpostList.size(); i++) {
+            JsonObject supPost = subpostList.get(i).getAsJsonObject();
+            JsonArray contents = supPost.get("content").getAsJsonArray();
+
+            String name = supPost.get("author").getAsJsonObject().get("name").getAsString();
+
+            if (name.equals(username)) {
+                String text = new String();
+                for (int j=0; j<contents.size(); j++) {
+                    JsonObject content = contents.get(j).getAsJsonObject();
+
+                    if (content.get("type").getAsString().equals("0")) {
+                        text += content.get("text").getAsString();
+                    }
+
+                }
+                text = text.replaceFirst("回复.*?:", "")
+                        .replace(" ", "");
+                posts.add(text);
+            }
+        }
+        return posts;
+    }
+
 }

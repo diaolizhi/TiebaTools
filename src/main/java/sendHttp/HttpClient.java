@@ -533,13 +533,13 @@ public class HttpClient {
 
 //    TODO：该方法未完成
     /** 
-    * @Description: 通过【帖子id】和【回复id / 楼层id】获取某一楼的内容，返回结果未处理
+    * @Description: 通过【帖子id】和【回复id / 楼层id】获取某一楼的内容，直接返回内容
     * @Param: [BDUSS, kz, pid] 
     * @return: void 
     * @Author: diaolizhi
     * @Date: 2018/12/20 
     */ 
-    public void seeAFloor(String kz, String pid, int type) {
+    public String seeAFloor(String kz, String pid, String pn, int type) {
         String url = "http://c.tieba.baidu.com/c/f/pb/floor";
 
         Headers.Builder builder = getBuilder();
@@ -554,7 +554,7 @@ public class HttpClient {
         map.put("kz", kz);
         map.put(key, pid);
         map.put("_client_type", "2");
-        map.put("pn", "1");
+        map.put("pn", pn);
         map.put("rn", "20");
         map.put("_client_version", "9.6.0");
         map.put("net_type", "1");
@@ -562,11 +562,13 @@ public class HttpClient {
         try {
             String res = exePostRequest(url, builder, map).body().string();
 
-            System.out.println(res);
+            return res;
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return null;
     }
 
     /**
