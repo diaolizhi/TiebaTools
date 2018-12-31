@@ -226,6 +226,10 @@ public class JsonUtils {
 
     public static String fuidParser(String res) {
         JsonObject root = getJsonObject(res);
+//        如果用户 uid 不存在就返回 null
+        if (root.get("user_info") == null) {
+            return null;
+        }
         JsonArray userInfo = root.get("user_info").getAsJsonArray();
         return userInfo.get(0).getAsJsonObject().get("user_id").getAsString();
     }

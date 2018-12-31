@@ -297,6 +297,11 @@ public class HttpClient {
     public UserForumsInfo getOtherForumList(String name, String pn) {
         String uid = getFriendUid(name);
 
+//        如果该用户不存在，直接返回 null
+        if (uid == null) {
+            return null;
+        }
+
         Headers.Builder builder = getBuilder();
         builder.add("client_user_token", uid);
         builder.add("Charset", "UTF-8");
