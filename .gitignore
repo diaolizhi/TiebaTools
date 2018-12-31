@@ -1,4 +1,4 @@
 target/
 .idea/
-tiebatool.iml
+*.iml
 src/test/
