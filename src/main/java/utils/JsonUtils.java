@@ -140,8 +140,6 @@ public class JsonUtils {
     public static UserForumsInfo userForumListParser(String res) {
         JsonObject root = getJsonObject(res);
 
-        System.out.println(res);
-
         int hasMore = root.get("has_more").getAsInt();
 
 //        userForumsInfo 包含的信息：1、是否还有下一页。 2、贴吧列表(使用 ArrayList<OneForumInfo> 保存)
