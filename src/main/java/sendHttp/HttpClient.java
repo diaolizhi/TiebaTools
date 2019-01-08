@@ -41,7 +41,7 @@ public class HttpClient {
     * @Author: diaolizhi
     * @Date: 2018/12/23
     */
-    public void getUserInfo(TBUser tbUser) {
+    public void getUserInfo(TBUser tbUser) throws GetInfoException{
         Headers.Builder builder = getBuilder();
 
         TreeMap<String, String> map = new TreeMap<>();
@@ -58,10 +58,8 @@ public class HttpClient {
 
             tbUser.setUid(info[0]);
             tbUser.setUserName(info[1]);
-
         } catch (Exception e) {
-            System.err.println("获取用户信息失败：可能是 BDUSS 有误。");
-            e.printStackTrace();
+            throw new GetInfoException("获取用户信息失败，可能是 BDUSS 有误。");
         }
 
     }
