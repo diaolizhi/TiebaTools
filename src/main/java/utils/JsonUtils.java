@@ -21,21 +21,28 @@ public class JsonUtils {
     * @Date: 2018/12/22
     */
     public static ReplyRecord[] recordsParser(String res) {
-        JsonElement element = new JsonParser().parse(res);
-        JsonObject object = element.getAsJsonObject();
-        JsonArray array = object.getAsJsonArray("post_list");
+
+        JsonObject root = getJsonObject(res);
+
+        int errorCode = root.get("error_code").getAsInt();
+
+        if (errorCode != 0) {
+            return null;
+        }
+
+        JsonArray array = root.getAsJsonArray("post_list");
 
         ReplyRecord[] records = new ReplyRecord[array.size()];
 
         for (int i=0; i<array.size(); i++) {
-            object = array.get(i).getAsJsonObject();
-            String forum_id = object.get("forum_id").getAsString();
-            String thread_id = object.get("thread_id").getAsString();
-            String post_id = object.get("post_id").getAsString();
-            String forumName = object.get("forum_name").getAsString();
-            String title = object.get("title").getAsString();
+            root = array.get(i).getAsJsonObject();
+            String forum_id = root.get("forum_id").getAsString();
+            String thread_id = root.get("thread_id").getAsString();
+            String post_id = root.get("post_id").getAsString();
+            String forumName = root.get("forum_name").getAsString();
+            String title = root.get("title").getAsString();
 
-            JsonArray contents = object.get("content").getAsJsonArray();
+            JsonArray contents = root.get("content").getAsJsonArray();
 
             String replyContent = "";
             String replyPostId;
@@ -77,7 +84,7 @@ public class JsonUtils {
             String quoteContent = "";
 
             try {
-                JsonObject quote = object.get("quote").getAsJsonObject();
+                JsonObject quote = root.get("quote").getAsJsonObject();
                 quotePostId = quote.get("post_id").getAsString();
                 quoteUserName = quote.get("user_name").getAsString();
                 quoteContent = quote.get("content").getAsString();

@@ -404,7 +404,8 @@ public class HttpClient {
 
             return JsonUtils.recordsParser(res);
         } catch (IOException e) {
-            e.printStackTrace();
+//            对于网络请求失败的请求，究竟应不应该打印错误信息呢
+//            e.printStackTrace();
         }
 
         return null;
