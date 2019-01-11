@@ -190,7 +190,7 @@ public class HttpClient {
                     String[] err = new String[2];
                     err[0] = forumList.get(j)[0];
                     err[1] = forumList.get(j)[1];
-                    synchronized (this) {
+                    synchronized (errorList) {
                         errorList.add(err);
                     }
                     System.err.println(forumList.get(j)[0] + "网络请求失败");
@@ -212,7 +212,7 @@ public class HttpClient {
                         String[] err = new String[2];
                         err[0] = forumList.get(j)[0];
                         err[1] = forumList.get(j)[1];
-                        synchronized (this) {
+                        synchronized (errorList) {
                             errorList.add(err);
                         }
                     }
