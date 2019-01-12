@@ -47,7 +47,12 @@ public class TBUser {
     * @Date: 2018/11/12
     */
     private void getUserInfo() {
-        client.getUserInfo(this);
+        try {
+            client.getUserInfo(this);
+        } catch (GetInfoException e) {
+            this.setUserName(null);
+            this.setUid(null);
+        }
     }
 
     /**

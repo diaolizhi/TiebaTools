@@ -41,7 +41,7 @@ public class HttpClient {
     * @Author: diaolizhi
     * @Date: 2018/12/23
     */
-    public void getUserInfo(TBUser tbUser) {
+    public void getUserInfo(TBUser tbUser) throws GetInfoException{
         Headers.Builder builder = getBuilder();
 
         TreeMap<String, String> map = new TreeMap<>();
@@ -58,10 +58,8 @@ public class HttpClient {
 
             tbUser.setUid(info[0]);
             tbUser.setUserName(info[1]);
-
         } catch (Exception e) {
-            System.err.println("获取用户信息失败：可能是 BDUSS 有误。");
-            e.printStackTrace();
+            throw new GetInfoException("获取用户信息失败，可能是 BDUSS 有误。");
         }
 
     }
@@ -192,7 +190,7 @@ public class HttpClient {
                     String[] err = new String[2];
                     err[0] = forumList.get(j)[0];
                     err[1] = forumList.get(j)[1];
-                    synchronized (this) {
+                    synchronized (errorList) {
                         errorList.add(err);
                     }
                     System.err.println(forumList.get(j)[0] + "网络请求失败");
@@ -214,7 +212,7 @@ public class HttpClient {
                         String[] err = new String[2];
                         err[0] = forumList.get(j)[0];
                         err[1] = forumList.get(j)[1];
-                        synchronized (this) {
+                        synchronized (errorList) {
                             errorList.add(err);
                         }
                     }
@@ -406,7 +404,8 @@ public class HttpClient {
 
             return JsonUtils.recordsParser(res);
         } catch (IOException e) {
-            e.printStackTrace();
+//            对于网络请求失败的请求，究竟应不应该打印错误信息呢
+//            e.printStackTrace();
         }
 
         return null;
