@@ -629,6 +629,10 @@ public class HttpClient {
 
         while (hasMore && forumList.size() <= 3001) {
             forumsInfo = getOtherForumList(username, String.valueOf(pageNo++));
+//            如果【没有检查用户是否存在就直接克隆】，就可能出现获取到 null 的情况
+            if (forumsInfo == null) {
+                return;
+            }
             hasMore = forumsInfo.getHasMore() == 1;
             if (forumsInfo.getOneForumInfos() != null) {
                 addForumToList(forumList, forumsInfo);
