@@ -24,9 +24,9 @@ public class JsonUtils {
 
         JsonObject root = getJsonObject(res);
 
-        int errorCode = root.get("error_code").getAsInt();
+        String errorCodeStr = root.get("error_code").getAsString();
 
-        if (errorCode != 0) {
+        if (errorCodeStr.equals("") || !errorCodeStr.equals("0")) {
             return null;
         }
 
