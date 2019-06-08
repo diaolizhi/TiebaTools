@@ -374,34 +374,38 @@ public class HttpClient {
     }
 
     /**
-    * @Description: 获取某人的回帖记录，BDUSS 可以传入任意字符串
+    * @Description: 获取某人的回帖记录，BDUSS 可以传入任意字符串（以失效）
     * @Param: [BDUSS, userName, pn]
     * @return: void
     * @Author: diaolizhi
     * @Date: 2018/12/20
     */
+    @Deprecated
     public ReplyRecord[] getUserPost(String BDUSS, String userName, String pn) {
 
         Headers.Builder builder = getBuilder();
 
         TreeMap<String, String> map = new TreeMap<>();
         map.put("BDUSS", BDUSS);
-        map.put("need_content", "1");
+//        map.put("need_content", "1");
 //        is_thread 表明获取的是不是主题帖，但是只能查看自己的（通过自己的 BDUSS），没什么用。
+        map.put("is_thread", "0");
         map.put("net_type", "2");
-        map.put("thread_type", "0");
+        map.put("thread_type", "1");
         map.put("_client_id", "wappc_1545325162964_493.0");
         map.put("timestamp", String.valueOf(System.currentTimeMillis()));
         map.put("_client_type", "2");
-        map.put("pn", pn);
-        map.put("uid", getFriendUid(userName));
-        map.put("_client_version", "9.2.2");
+        map.put("type", "2");
+        map.put("pn", "1");
+        map.put("uid", getFriendUid("刁礼智"));
+        map.put("_client_version", "9.8.8.7");
+
+        map.put("tbs", getTbs(BDUSS));
 
         String url = "http://c.tieba.baidu.com/c/u/feed/userpost";
 
         try {
             String res = exePostRequest(url, builder, map).body().string();
-
             return JsonUtils.recordsParser(res);
         } catch (IOException e) {
 //            对于网络请求失败的请求，究竟应不应该打印错误信息呢
